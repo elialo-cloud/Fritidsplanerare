@@ -65,8 +65,12 @@
   </div>
   <div id="modal" class="modal hidden"><div class="modal-card" id="modalCard"></div></div>
 
-  <!-- docx.js browser bundle. jsDelivr is used because the old cdnjs path was invalid. -->
-  <script src="https://cdn.jsdelivr.net/npm/docx@9.7.1/dist/index.umd.cjs"></script>
+  <!-- docx.js: använd IIFE-browserbygget så att globalen window.docx garanteras. -->
+  <script src="https://cdn.jsdelivr.net/npm/docx@9.7.1/dist/index.iife.js"></script>
+  <script>
+    // Om CDN-scriptet laddades korrekt ska exportWord kunna hitta biblioteket som window.docx.
+    window.__docxLoaded = !!window.docx;
+  </script>
   <script src="app.js"></script>
 </body>
 </html>
