@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="quick-create.css">
 </head>
 <body>
   <div class="paper-shell">
@@ -38,12 +39,12 @@
             <h1>Vad händer på <em>fritids?</em></h1>
             <p class="lead">Samla dagen på ett ställe — aktiviteter, tider, personal, mat och allt som behöver göras.</p>
           </div>
-          <button class="new-day-btn" id="newDay"><span>＋</span> Ny dag</button>
+          <button class="new-day-btn" id="newDay"><span>＋</span> Skapa planering</button>
         </div>
         <div class="stats" id="stats"></div>
         <div class="board-heading">
           <div><span class="pin">●</span><h2>Lovets tavla</h2><p>Dina planerade dagar, i ordning.</p></div>
-          <button class="small-add" id="newDay2">＋ Lägg till dag</button>
+          <button class="small-add" id="newDay2">＋ Lägg till planering</button>
         </div>
         <div id="daysList" class="day-list"></div>
       </section>
@@ -68,9 +69,9 @@
   <!-- docx.js: använd IIFE-browserbygget så att globalen window.docx garanteras. -->
   <script src="https://cdn.jsdelivr.net/npm/docx@9.7.1/dist/index.iife.js"></script>
   <script>
-    // Om CDN-scriptet laddades korrekt ska exportWord kunna hitta biblioteket som window.docx.
     window.__docxLoaded = !!window.docx;
   </script>
   <script src="app.js"></script>
+  <script src="quick-create.js"></script>
 </body>
 </html>
