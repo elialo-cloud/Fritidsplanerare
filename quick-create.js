@@ -6,7 +6,7 @@
   const mins=t=>{const p=String(t||'08:00').split(':').map(Number);return (p[0]||0)*60+(p[1]||0)};
   const time=m=>{m=Math.max(480,Math.min(1439,m));return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')};
   const uid=()=>{try{if(window.crypto&&crypto.randomUUID)return crypto.randomUUID()}catch(e){}return 'a-'+Date.now()+'-'+Math.random().toString(36).slice(2)};
-  const esc=s=>String(s??'').replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[m]));
+  const esc=s=>String(s??'').replace(/[&<>\\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\\"':'&quot;',"'":'&#039;'}[m]));
   function state(){try{return JSON.parse(localStorage.getItem(KEY))||{days:[]}}catch(e){return {days:[]}}}
   function currentDay(){const s=state();return (s.days||[]).find(d=>d.id===s.selected)||null}
   function saveDay(day){const s=state();const i=(s.days||[]).findIndex(d=>d.id===day.id);if(i<0)return;s.days[i]=day;localStorage.setItem(KEY,JSON.stringify(s))}
@@ -28,6 +28,10 @@
       '<section class="timeline"><div class="timeline-head">'+TIMES.map(t=>'<div class="time-head">'+t+'</div>').join('')+'</div><div class="timeline-body">'+TIMES.map(t=>'<div class="drop-row" data-time="'+t+'"><div class="row-time">'+t+'</div><div class="drop-zone" data-drop-time="'+t+'"></div></div>').join('')+acts.map(activityCard).join('')+'</div></section></div></div>';
     wirePlanner(host);
   }
+  function clearDragState(host){
+    if(host)host.querySelectorAll('.dragging,.drag-over').forEach(x=>x.classList.remove('dragging','drag-over'));
+    try{document.body.classList.remove('is-dragging')}catch(e){}
+  }
   function wirePlanner(host){
     host.querySelectorAll('.bank-item').forEach(item=>item.addEventListener('dragstart',e=>{
       e.stopPropagation();
@@ -35,6 +39,7 @@
       e.dataTransfer.setData('text/plain','bank:'+item.dataset.bank);
       e.dataTransfer.effectAllowed='copy';
       item.classList.add('dragging');
+      document.body.classList.add('is-dragging');
     }));
     host.querySelectorAll('.dnd-card').forEach(card=>card.addEventListener('dragstart',e=>{
       if(e.target.closest('.dnd-delete')){e.preventDefault();return}
@@ -43,15 +48,15 @@
       e.dataTransfer.setData('text/plain','act:'+card.dataset.id);
       e.dataTransfer.effectAllowed='move';
       card.classList.add('dragging');
+      document.body.classList.add('is-dragging');
     }));
-    host.addEventListener('dragend',()=>host.querySelectorAll('.dragging').forEach(x=>x.classList.remove('dragging')));
+    host.addEventListener('dragend',()=>clearDragState(host));
 
-    // Drop-zonerna tar emot droppen direkt. Det är stabilare än att räkna ut Y-positionen på hela tavlan.
     host.querySelectorAll('.drop-row').forEach(row=>{
       row.addEventListener('dragover',e=>{
         e.preventDefault();
         e.stopPropagation();
-        e.dataTransfer.dropEffect=e.dataTransfer.types.includes('text/plain')?'move':'copy';
+        e.dataTransfer.dropEffect='move';
         row.classList.add('drag-over');
       });
       row.addEventListener('dragleave',e=>{
@@ -60,8 +65,9 @@
       row.addEventListener('drop',e=>{
         e.preventDefault();
         e.stopPropagation();
-        row.classList.remove('drag-over');
         const payload=e.dataTransfer.getData('text/plain');
+        row.classList.remove('drag-over');
+        clearDragState(host);
         dropAt(payload,row.dataset.time);
       });
     });
