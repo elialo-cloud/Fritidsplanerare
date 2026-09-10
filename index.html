@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fritidsplanerare</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">F</div><div><strong>Fritidsplanerare</strong><span>Lov & UF-dagar</span></div></div>
+      <nav>
+        <button class="nav active" data-view="dashboard">Översikt</button>
+        <button class="nav" data-view="week">Veckoplan</button>
+        <button class="nav" data-view="people">Personal</button>
+        <button class="nav" data-view="templates">Aktivitetsmallar</button>
+      </nav>
+      <div class="sidebar-bottom"><button class="secondary full" id="exportJson">Säkerhetskopiera</button><label class="secondary full file-btn">Importera<input id="importJson" type="file" accept="application/json"></label></div>
+    </aside>
+    <main>
+      <header class="topbar"><div><div class="eyebrow">PLANERING</div><h1 id="pageTitle">Översikt</h1></div><div class="top-actions"><button class="secondary" id="printBtn">Skriv ut</button><button class="primary" id="exportWord">Exportera till Word</button></div></header>
+      <section id="dashboardView" class="view">
+        <div class="hero"><div><div class="eyebrow">FRITIDSHEM</div><h2>Planera lovet utan krångel.</h2><p>Skapa tydliga dagar med tider, aktiviteter, barn, personal, mat och material.</p></div><button class="primary large" id="newDay">+ Ny dag</button></div>
+        <div class="stats" id="stats"></div>
+        <div class="section-head"><div><h3>Kommande planering</h3><p>Öppna en dag för att redigera den.</p></div><button class="secondary" id="newDay2">+ Ny dag</button></div>
+        <div id="daysList" class="day-list"></div>
+      </section>
+      <section id="editorView" class="view hidden"></section>
+      <section id="weekView" class="view hidden"><div class="section-head"><div><h3>Veckoplan</h3><p>Överblick över aktiviteter och måltider.</p></div></div><div id="weekGrid" class="week-grid"></div></section>
+      <section id="peopleView" class="view hidden"><div class="section-head"><div><h3>Personal</h3><p>Hantera personal och se dagens ansvar.</p></div><button class="primary" id="addPerson">+ Lägg till personal</button></div><div id="peopleList" class="people-list"></div></section>
+      <section id="templatesView" class="view hidden"><div class="section-head"><div><h3>Aktivitetsmallar</h3><p>Lägg till vanliga aktiviteter med ett klick.</p></div></div><div id="templatesGrid" class="template-grid"></div></section>
+    </main>
+  </div>
+  <div id="modal" class="modal hidden"><div class="modal-card" id="modalCard"></div></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/9.5.1/docx.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
