@@ -64,8 +64,9 @@
     </main>
   </div>
   <div id="modal" class="modal hidden"><div class="modal-card" id="modalCard"></div></div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/9.5.1/docx.umd.min.js"></script>
+
+  <!-- docx.js browser bundle. jsDelivr is used because the old cdnjs path was invalid. -->
+  <script src="https://cdn.jsdelivr.net/npm/docx@9.7.1/dist/index.umd.cjs"></script>
   <script src="app.js"></script>
-  <script src="new-day-fix.js"></script>
 </body>
 </html>
