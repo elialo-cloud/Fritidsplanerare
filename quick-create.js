@@ -4,7 +4,7 @@
   const times=[];for(let m=480;m<=960;m+=30)times.push(String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0'));
   const pad=n=>String(n).padStart(2,'0');
   const uid=()=>{try{if(window.crypto&&crypto.randomUUID)return crypto.randomUUID()}catch(e){}return 'a-'+Date.now()+'-'+Math.random().toString(36).slice(2)};
-  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+  const esc=s=>String(s??'').replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[m]));
   const mins=t=>{const p=String(t||'08:00').split(':').map(Number);return (p[0]||0)*60+(p[1]||0)};
   const time=m=>{m=Math.max(480,Math.min(1439,m));return pad(Math.floor(m/60))+':'+pad(m%60)};
   const load=()=>{try{return JSON.parse(localStorage.getItem(KEY))||{days:[]}}catch(e){return {days:[]}}};
@@ -13,8 +13,25 @@
   function makeActivity(name,placeType,start){return {id:uid(),start,end:time(mins(start)+60),name,placeType,place:'Fritids',group:'Alla',staff:[],material:'',description:'',safety:''}}
   function activityCard(a){const top=((mins(a.start)-480)/30)*56;const h=Math.max(58,((mins(a.end)-mins(a.start))/30)*56-6);return '<div class="dnd-card '+(a.placeType==='Ute'?'outside':'inside')+'" draggable="true" data-id="'+esc(a.id)+'" style="top:'+top+'px;height:'+h+'px"><span class="dnd-card-icon">'+(a.placeType==='Ute'?'☀':'✦')+'</span><div><strong>'+esc(a.name)+'</strong><small>'+esc(a.start)+'–'+esc(a.end)+'</small></div><button class="dnd-delete" data-delete="'+esc(a.id)+'">×</button></div>'}
   function renderPlanner(){const host=document.getElementById('editorView');if(!host)return;const d=currentDay();if(!d)return;const acts=(d.activities||[]).slice().sort((a,b)=>mins(a.start)-mins(b.start));host.innerHTML='<div class="dnd-planner"><div class="dnd-top"><div><div class="eyebrow">PLANERINGSTAVLA</div><h2>'+esc(new Date(d.date+'T12:00:00').toLocaleDateString('sv-SE',{weekday:'long',day:'numeric',month:'long'}))+'</h2><p>Dra aktiviteterna direkt till rätt tid. Inga formulär behövs.</p></div><div class="dnd-top-actions"><button class="secondary" onclick="closeEditor()">Tillbaka</button><button class="primary" onclick="exportWord()">📄 Word</button></div></div><div class="dnd-layout"><aside class="activity-bank"><div class="bank-title">AKTIVITETER</div><div class="bank-help">Dra → släpp på tiden</div>'+BANK.map((x,i)=>'<div class="bank-item" draggable="true" data-bank="'+i+'"><span>'+x[0]+'</span><strong>'+x[1]+'</strong><small>'+x[2]+'</small></div>').join('')+'</aside><section class="timeline"><div class="timeline-head">'+times.slice(0,-1).map(t=>'<div class="time-head">'+t+'</div>').join('')+'</div><div class="timeline-body">'+times.slice(0,-1).map(t=>'<div class="drop-row" data-time="'+t+'"><div class="row-time">'+t+'</div><div class="drop-zone"></div></div>').join('')+acts.map(activityCard).join('')+'</div></section></div></div>';wirePlanner(host)}
-  function wirePlanner(host){host.querySelectorAll('.bank-item').forEach(item=>item.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain','bank:'+item.dataset.bank);e.dataTransfer.effectAllowed='copy'}));host.querySelectorAll('.dnd-card').forEach(card=>card.addEventListener('dragstart',e=>{if(e.target.closest('.dnd-delete')){e.preventDefault();return}e.dataTransfer.setData('text/plain','act:'+card.dataset.id);e.dataTransfer.effectAllowed='move'}));host.querySelectorAll('.drop-row').forEach(row=>{row.addEventListener('dragover',e=>{e.preventDefault();row.classList.add('drag-over');e.dataTransfer.dropEffect='move'});row.addEventListener('dragleave',()=>row.classList.remove('drag-over'));row.addEventListener('drop',e=>{e.preventDefault();row.classList.remove('drag-over');dropAt(e.dataTransfer.getData('text/plain'),row.dataset.time)})});host.querySelectorAll('[data-delete]').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();removeActivity(btn.dataset.delete)}))}
-  function dropAt(payload,start){const d=currentDay();if(!d)return;const [kind,id]=String(payload).split(':');if(kind==='bank'){const b=BANK[Number(id)];if(!b)return;d.activities=d.activities||[];d.activities.push(makeActivity(b[1],b[2],start));saveDay(d);renderPlanner();return}if(kind==='act'){const a=(d.activities||[]).find(x=>x.id===id);if(!a)return;const duration=Math.max(30,mins(a.end)-mins(a.start));a.start=start;a.end=time(mins(start)+duration);saveDay(d);renderPlanner()}}
+  function wirePlanner(host){
+    host.querySelectorAll('.bank-item').forEach(item=>item.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain','bank:'+item.dataset.bank);e.dataTransfer.effectAllowed='copy';item.classList.add('dragging')}));
+    host.querySelectorAll('.dnd-card').forEach(card=>card.addEventListener('dragstart',e=>{if(e.target.closest('.dnd-delete')){e.preventDefault();return}e.dataTransfer.setData('text/plain','act:'+card.dataset.id);e.dataTransfer.effectAllowed='move';card.classList.add('dragging')}));
+    host.addEventListener('dragend',()=>host.querySelectorAll('.dragging').forEach(x=>x.classList.remove('dragging')));
+    const body=host.querySelector('.timeline-body');
+    if(body){
+      body.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';body.classList.add('drag-active')});
+      body.addEventListener('dragleave',e=>{if(!body.contains(e.relatedTarget))body.classList.remove('drag-active')});
+      body.addEventListener('drop',e=>{
+        e.preventDefault();e.stopPropagation();body.classList.remove('drag-active');
+        const rect=body.getBoundingClientRect();
+        const y=Math.max(0,e.clientY-rect.top);
+        const row=Math.max(0,Math.min(16,Math.floor(y/56)));
+        dropAt(e.dataTransfer.getData('text/plain'),times[row]);
+      });
+    }
+    host.querySelectorAll('[data-delete]').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();removeActivity(btn.dataset.delete)}));
+  }
+  function dropAt(payload,start){const d=currentDay();if(!d)return;const parts=String(payload||'').split(':');const kind=parts.shift();const id=parts.join(':');if(kind==='bank'){const b=BANK[Number(id)];if(!b)return;d.activities=d.activities||[];d.activities.push(makeActivity(b[1],b[2],start));saveDay(d);renderPlanner();return}if(kind==='act'){const a=(d.activities||[]).find(x=>x.id===id);if(!a)return;const duration=Math.max(30,mins(a.end)-mins(a.start));a.start=start;a.end=time(mins(start)+duration);saveDay(d);renderPlanner()}}
   function removeActivity(id){const d=currentDay();if(!d)return;d.activities=(d.activities||[]).filter(a=>a.id!==id);saveDay(d);renderPlanner()}
   function boot(){const ev=document.getElementById('editorView');if(!ev)return;new MutationObserver(()=>{if(!ev.classList.contains('hidden')&&!ev.querySelector('.dnd-planner')&&currentDay())renderPlanner()}).observe(ev,{childList:true,subtree:true});if(!ev.classList.contains('hidden')&&currentDay())renderPlanner()}
   document.addEventListener('DOMContentLoaded',boot);setTimeout(boot,500);
