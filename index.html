@@ -7,25 +7,26 @@
 <link rel="stylesheet" href="planner-v2.css">
 </head>
 <body>
-<header class="simple-header">
-  <div class="simple-brand">Fritids<span>planeraren</span></div>
-  <div class="simple-tools">
-    <button id="printBtn">🖨️ Skriv ut</button>
-    <button id="exportWord">📄 Word</button>
-  </div>
-</header>
-<main>
-<section id="dashboardView" class="view">
-  <div class="home-title"><h1>Mina planeringar</h1><p>Välj en dag eller skapa en ny.</p></div>
-  <button class="big-new" id="newDay">＋ Ny planeringsdag</button>
-  <div id="stats" class="stats simple-stats"></div>
-  <div id="daysList" class="day-list"></div>
-</section>
-<section id="editorView" class="view hidden"></section>
-<section id="weekView" class="view hidden"><div id="weekGrid"></div></section>
-<section id="templatesView" class="view hidden"><div id="templatesGrid"></div></section>
-<section id="peopleView" class="view hidden"><div id="peopleList"></div></section>
-</main>
+<div id="app">
+  <header class="topbar">
+    <button class="brand" onclick="closeEditor()">Fritids<span>planeraren</span></button>
+    <div class="top-actions">
+      <button id="printBtn">🖨️ Skriv ut</button>
+      <button id="exportWord">📄 Word</button>
+    </div>
+  </header>
+  <main>
+    <section id="dashboardView" class="view">
+      <div class="home"><h1>Vad ska ni göra?</h1><p>Välj en planering eller börja en ny.</p><button class="new-plan" id="newDay">＋ Ny planering</button></div>
+      <div id="stats" class="stats"></div>
+      <div id="daysList" class="day-list"></div>
+    </section>
+    <section id="editorView" class="view hidden"></section>
+    <section id="weekView" class="view hidden"><div id="weekGrid"></div></section>
+    <section id="templatesView" class="view hidden"><div id="templatesGrid"></div></section>
+    <section id="peopleView" class="view hidden"><div id="peopleList"></div></section>
+  </main>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/docx@9.7.1/dist/index.iife.js"></script>
 <script src="planner-v2.js"></script>
 <script src="simple-ui.js"></script>
