@@ -1,52 +1,50 @@
 (function(){
-  const TYPES=['Höstlov','Jullov','Sportlov','Påsklov','Sommarlov','Studiedag','Övrigt'];
   const KEY='fritidsplanerare-v1';
   const uid=()=>{try{if(window.crypto&&crypto.randomUUID)return crypto.randomUUID()}catch(e){}return 'a-'+Date.now()+'-'+Math.random().toString(36).slice(2)};
   const pad=n=>String(n).padStart(2,'0');
   const dateStr=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
-  function nextMonday(){const d=new Date();const day=d.getDay();d.setDate(d.getDate()+((8-day)%7||7));return dateStr(d)}
-  function today(){return dateStr(new Date())}
+  const today=()=>dateStr(new Date());
+  function nextMonday(){const d=new Date();const day=d.getDay();const add=day===0?1:day===1?0:8-day;d.setDate(d.getDate()+add);return dateStr(d)}
   function load(){try{return JSON.parse(localStorage.getItem(KEY))||{days:[],people:[],selected:null}}catch(e){return {days:[],people:[],selected:null}}}
   function save(s){localStorage.setItem(KEY,JSON.stringify(s))}
-  function defaultDay(date,type){return {id:uid(),date,type,children:0,responsible:'',activities:[],lunch:'11:30 – Matsal',snack:'14:30 – Fritids',materials:[],todos:[]}}
+  function defaultDay(date,name){return {id:uid(),date,type:name||'Övrigt',name:name||'',children:0,responsible:'',activities:[],lunch:'11:30 – Matsal',snack:'14:30 – Fritids',materials:[],todos:[]}}
   function openModal(){
-    const modal=document.getElementById('modal'), card=document.getElementById('modalCard'); if(!modal||!card)return;
-    card.innerHTML=`<div class="quick-create"><button class="qc-close" id="qcClose" aria-label="Stäng">×</button><div class="qc-kicker">SKAPA PLANERING</div><h2>Vad ska du planera?</h2><p class="qc-lead">Välj ett upplägg. Resten fixar vi åt dig.</p><div class="qc-choice-grid"><button class="qc-choice" data-qc-mode="day"><span>☀️</span><strong>En lovdag</strong><small>Skapa en dag och börja fylla den direkt.</small></button><button class="qc-choice" data-qc-mode="week"><span>📅</span><strong>En lovvecka</strong><small>Skapa måndag–fredag på en gång.</small></button></div></div>`;
+    const modal=document.getElementById('modal'),card=document.getElementById('modalCard');if(!modal||!card)return;
+    card.innerHTML='<div class="simple-create"><button class="simple-close" id="scClose" aria-label="Stäng">×</button><h2>Ny planering</h2><p>Vad vill du skapa?</p><div class="simple-choice"><button data-mode="day"><span>📅</span>Dag</button><button data-mode="week"><span>📆</span>Vecka</button></div></div>';
     modal.classList.remove('hidden');
-    card.querySelector('#qcClose').onclick=close;
-    card.querySelectorAll('[data-qc-mode]').forEach(b=>b.onclick=()=>step2(b.dataset.qcMode));
+    card.querySelector('#scClose').onclick=close;
+    card.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>showForm(b.dataset.mode));
   }
   function close(){document.getElementById('modal')?.classList.add('hidden')}
-  function step2(mode){
-    const card=document.getElementById('modalCard'); const isWeek=mode==='week';
-    card.innerHTML=`<div class="quick-create"><button class="qc-close" id="qcClose" aria-label="Stäng">×</button><div class="qc-kicker">${isWeek?'LOVVECKA':'LOVDAG'}</div><h2>${isWeek?'När börjar lovet?':'När är dagen?'}</h2><div class="qc-form"><label>Första dagen<input id="qcDate" type="date" value="${isWeek?nextMonday():today()}"></label><label>Lov / typ<select id="qcType">${TYPES.map(x=>`<option>${x}</option>`).join('')}</select></label><label>Antal barn<input id="qcChildren" type="number" min="0" placeholder="t.ex. 35"></label><label>Ansvarig<input id="qcResponsible" placeholder="t.ex. Elias"></label></div><div class="qc-preview" id="qcPreview"></div><button class="primary qc-create" id="qcCreate">${isWeek?'✨ Skapa hela lovveckan':'✨ Skapa lovdagen'}</button></div>`;
-    card.querySelector('#qcClose').onclick=close;
-    const date=card.querySelector('#qcDate'), preview=card.querySelector('#qcPreview');
-    function updatePreview(){
-      if(!isWeek){preview.textContent='En planeringsdag skapas. Du fyller aktiviteterna efteråt.';return}
-      const d=new Date((date.value||nextMonday())+'T12:00:00'),days=[];
-      while(days.length<5){if(d.getDay()!==0&&d.getDay()!==6)days.push(new Intl.DateTimeFormat('sv-SE',{weekday:'long',day:'numeric',month:'long'}).format(d));d.setDate(d.getDate()+1)}
-      preview.innerHTML='<strong>Det här skapas:</strong> '+days.join(' · ');
+  function showForm(mode){
+    const card=document.getElementById('modalCard');
+    if(mode==='day'){
+      card.innerHTML='<div class="simple-create"><button class="simple-close" id="scClose" aria-label="Stäng">×</button><h2>Ny dag</h2><div class="simple-form"><label>Datum<input id="scDate" type="date" value="'+today()+'"></label><label>Namn<input id="scName" type="text" value="Höstlov" placeholder="T.ex. Höstlov"></label></div><div class="simple-actions"><button class="secondary" id="scBack">Tillbaka</button><button class="primary" id="scCreate">Skapa</button></div></div>';
+    }else{
+      card.innerHTML='<div class="simple-create"><button class="simple-close" id="scClose" aria-label="Stäng">×</button><h2>Ny vecka</h2><div class="simple-form"><label>Från<input id="scFrom" type="date" value="'+nextMonday()+'"></label><label>Till<input id="scTo" type="date" value="'+dateStr(new Date(nextMonday()+'T12:00:00').setDate(new Date(nextMonday()+'T12:00:00').getDate()+4))+'"></label><label class="full">Namn<input id="scName" type="text" value="Höstlov" placeholder="T.ex. Höstlov"></label></div><div class="simple-actions"><button class="secondary" id="scBack">Tillbaka</button><button class="primary" id="scCreate">Skapa</button></div></div>';
     }
-    date.addEventListener('input',updatePreview);updatePreview();
-    card.querySelector('#qcCreate').onclick=()=>create(mode);
+    card.querySelector('#scClose').onclick=close;
+    card.querySelector('#scBack').onclick=openModal;
+    card.querySelector('#scCreate').onclick=()=>create(mode);
   }
   function create(mode){
-    const card=document.getElementById('modalCard'), date=card.querySelector('#qcDate')?.value; if(!date)return;
-    const type=card.querySelector('#qcType')?.value||'Övrigt', children=Number(card.querySelector('#qcChildren')?.value)||0, responsible=(card.querySelector('#qcResponsible')?.value||'').trim();
-    const s=load(); if(!Array.isArray(s.days))s.days=[];
-    const created=[]; let d=new Date(date+'T12:00:00'), count=mode==='week'?5:1;
-    while(created.length<count){
-      if(mode==='week'&&(d.getDay()===0||d.getDay()===6)){d.setDate(d.getDate()+1);continue}
-      const day=defaultDay(dateStr(d),type); day.children=children;day.responsible=responsible;s.days.push(day);created.push(day);d.setDate(d.getDate()+1);
+    const card=document.getElementById('modalCard');
+    const name=(card.querySelector('#scName')?.value||'Övrigt').trim()||'Övrigt';
+    const dates=[];
+    if(mode==='day'){
+      const date=card.querySelector('#scDate')?.value;if(!date)return;
+      dates.push(date);
+    }else{
+      const from=card.querySelector('#scFrom')?.value,to=card.querySelector('#scTo')?.value;if(!from||!to||from>to)return;
+      const d=new Date(from+'T12:00:00'),end=new Date(to+'T12:00:00');
+      while(d<=end){dates.push(dateStr(d));d.setDate(d.getDate()+1)}
     }
+    const s=load();if(!Array.isArray(s.days))s.days=[];
+    const created=dates.map(date=>{const day=defaultDay(date,name);s.days.push(day);return day});
     s.selected=created[0].id;save(s);close();
     if(typeof window.openDay==='function')window.openDay(created[0].id);else location.reload();
   }
-  function intercept(e){
-    const t=e.target.closest?.('#newDay,#newDay2,.day-card button[onclick="newDay()"]');
-    if(!t)return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();openModal();
-  }
+  function intercept(e){const t=e.target.closest?.('#newDay,#newDay2,.day-card button[onclick="newDay()"]');if(!t)return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();openModal()}
   document.addEventListener('click',intercept,true);
   document.addEventListener('click',e=>{if(e.target===document.getElementById('modal'))close()});
 })();
