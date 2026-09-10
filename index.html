@@ -1,38 +1,33 @@
 <!doctype html>
 <html lang="sv">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fritidsplanerare</title>
-  <link rel="stylesheet" href="planner-v2.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fritidsplaneraren</title>
+<link rel="stylesheet" href="planner-v2.css">
 </head>
 <body>
-<div class="paper-shell">
-<header class="masthead">
-  <div class="brand-lockup"><div class="brand-symbol">FP</div><div><strong>fritids<span>planerare</span></strong><small>Planera. Dela. Genomför.</small></div></div>
-  <nav class="main-nav" aria-label="Huvudmeny">
-    <button class="nav active" data-view="dashboard"><span>▦</span>DAGAR</button>
-    <button class="nav" data-view="week"><span>◫</span>VECKA</button>
-    <button class="nav" data-view="templates"><span>✦</span>AKTIVITETER</button>
-    <button class="nav" data-view="people"><span>●</span>PERSONAL</button>
-  </nav>
-  <div class="quick-tools"><button class="tool-btn" id="printBtn">Skriv ut</button><button class="tool-btn word-btn" id="exportWord">Word</button><button class="tool-btn" id="exportJson">Export</button><label class="tool-btn import-btn">Import<input id="importJson" type="file" accept="application/json"></label></div>
+<header class="simple-header">
+  <div class="simple-brand">Fritids<span>planeraren</span></div>
+  <div class="simple-tools">
+    <button id="printBtn">🖨️ Skriv ut</button>
+    <button id="exportWord">📄 Word</button>
+  </div>
 </header>
 <main>
 <section id="dashboardView" class="view">
-  <div class="welcome-row"><div><p class="kicker">FRITIDSPLANERING</p><h1>Planera veckan.<br><span>Utan krångel.</span></h1><p class="lead">Skapa dagar, bygg aktiviteter från 08:00 och ha allt samlat inför lov och UF-dagar.</p></div><button class="new-day-btn" id="newDay">＋ Ny planeringsdag</button></div>
-  <div class="stats" id="stats"></div>
-  <div class="board-heading"><div><h2>Planeringsdagar</h2><p>Välj en dag för att öppna schemat. 🗑 raderar bara den dagen.</p></div><button class="small-add" id="newDay2">＋ Lägg till dag</button></div>
+  <div class="home-title"><h1>Mina planeringar</h1><p>Välj en dag eller skapa en ny.</p></div>
+  <button class="big-new" id="newDay">＋ Ny planeringsdag</button>
+  <div id="stats" class="stats simple-stats"></div>
   <div id="daysList" class="day-list"></div>
 </section>
 <section id="editorView" class="view hidden"></section>
-<section id="weekView" class="view hidden"><div class="page-intro"><p class="kicker">ÖVERSIKT</p><h1>Veckan</h1><p>Alla planerade dagar i en snabb överblick.</p></div><div id="weekGrid" class="week-grid"></div></section>
-<section id="templatesView" class="view hidden"><div class="page-intro"><p class="kicker">AKTIVITETSBANK</p><h1>Aktiviteter</h1><p>Välj en aktivitet för att lägga den i den öppna dagen.</p></div><div id="templatesGrid" class="template-grid"></div></section>
-<section id="peopleView" class="view hidden"><div class="page-intro with-action"><div><p class="kicker">TEAM</p><h1>Personal</h1><p>Håll en enkel lista över vilka som kan stå på aktiviteterna.</p></div><button class="new-day-btn" id="addPerson">＋ Lägg till personal</button></div><div id="peopleList" class="people-list"></div></section>
+<section id="weekView" class="view hidden"><div id="weekGrid"></div></section>
+<section id="templatesView" class="view hidden"><div id="templatesGrid"></div></section>
+<section id="peopleView" class="view hidden"><div id="peopleList"></div></section>
 </main>
-</div>
 <script src="https://cdn.jsdelivr.net/npm/docx@9.7.1/dist/index.iife.js"></script>
 <script src="planner-v2.js"></script>
-<script src="landing-fix.js"></script>
+<script src="simple-ui.js"></script>
 </body>
 </html>
